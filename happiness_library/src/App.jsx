@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react'
-import personService from './services/persons'
+import resourceService from './services/resources'
 
 const Filter = ({ filter, handleFilterChange }) => {
   return (
@@ -9,14 +9,14 @@ const Filter = ({ filter, handleFilterChange }) => {
   )
 }
 
-const PersonForm = ({ newName, newNumber, handleNameChange, handleNumberChange, addPerson }) => {
+const ResourceForm = ({ newTitle, newDescription, handleResourceChange, handleDescriptionChange, addResource }) => {
   return (
-    <form onSubmit={addPerson}>
+    <form onSubmit={addResource}>
       <div>
-        name: <input value={newName} onChange={handleNameChange} />
+        name: <input value={newTitle} onChange={handleResourceChange} />
       </div>
       <div>
-        number: <input value={newNumber} onChange={handleNumberChange} />
+        description: <input value={newDescription} onChange={handleDescriptionChange} />
       </div>
       <div>
         <button type="submit">add</button>
@@ -25,112 +25,112 @@ const PersonForm = ({ newName, newNumber, handleNameChange, handleNumberChange, 
   )
 }
 
-const Person = ({ person, deletePerson }) => {
+const Resource = ({ resource, deleteResource }) => {
   return (
     <div>
-      <button onClick={() => deletePerson(person.id)}>delete</button> {person.name} {person.number}
+      <button onClick={() => deleteResource(resource.id)}>delete</button> {resource.name}: {resource.description}
     </div>
   )
 }
 
-const Persons = ({ persons, deletePerson }) => {
+const Resources = ({ resources, deleteResource }) => {
   return (
     <div>
-      {persons.map((person) => (
-        <Person key={person.id} person={person} deletePerson={deletePerson} />
+      {resources.map((resource) => (
+        <Resource key={resource.id} resource={resource} deleteResource={deleteResource} />
       ))}
     </div>
   )
 }
 
 const App = () => {
-  const [persons, setPersons] = useState([])
+  const [resources, setResources] = useState([])
 
-  const [newName, setNewName] = useState('')
-  const [newNumber, setNewNumber] = useState('')
+  const [newTitle, setNewTitle] = useState('')
+  const [newDescription, setNewDescription] = useState('')
   const [filter, setFilter] = useState('')
 
   useEffect(() => {
-    personService.getAll()
+    resourceService.getAll()
     .then(response => {
-      setPersons(response.data)
+      setResources(response.data)
     })
     .catch(error => {
-      alert('Error detting persons');
+      alert('Error getting resources');
       console.error('Error:', error);
     });
   }, [])
 
-  const handleNameChange = (event) => {
-    setNewName(event.target.value)
+  const handleResourceChange = (event) => {
+    setNewTitle(event.target.value)
   }
-  const handleNumberChange = (event) => {
-    setNewNumber(event.target.value)
+  const handleDescriptionChange = (event) => {
+    setNewDescription(event.target.value)
   }
   const handleFilterChange = (event) => {
     setFilter(event.target.value)
   }
 
-  const addPerson = (event) => {
+  const addResource = (event) => {
     event.preventDefault();
   
-    const newPerson = {
-      name: newName,
-      number: newNumber
+    const newResource = {
+      name: newTitle,
+      description: newDescription
     };
   
-    const existingPerson = persons.find(person => person.name === newName);
+    const existingResource = resources.find(resource => resource.name === newTitle);
   
-    if (existingPerson) {
-      if (window.confirm(`${newName} is already added to phonebook. Replace the old number with a new one?`)) {
-        personService.update(existingPerson.id, newPerson)
+    if (existingResource) {
+      if (window.confirm(`${newTitle} is already added to the library. Replace the old data with the new data?`)) {
+        resourceService.update(existingResource.id, newResource)
           .then(response => {
-            const updatedPersons = persons.map(person =>
-              person.id !== existingPerson.id 
-              ? person 
+            const updatedResources = resources.map(resource =>
+              resource.id !== existingResource.id 
+              ? resource 
               : response.data
             );
-            setPersons(updatedPersons);
-            setNewName('');
-            setNewNumber('');
+            setResources(updatedResources);
+            setNewTitle('');
+            setNewDescription('');
           })
           .catch(error => {
-            alert('Error updating person');
-            console.error('Error:', error);
+            alert('Error updating resource');
+            console.error('Error:', error);filteredResources
           });
       }
     } else {
-      personService.create(newPerson)
+      resourceService.create(newResource)
       .then(response => {
-        const updatedPersons = persons.concat(response.data);
-        setPersons(updatedPersons);
-        setNewName('');
-        setNewNumber('');
+        const updatedResources = resources.concat(response.data);
+        setResources(updatedResources);
+        setNewTitle('');
+        setNewDescription('');
       })
       .catch(error => {
-        alert('Error updating person');
+        alert('Error updating resource');
         console.error('Error:', error);
       });
     }
   };
   
 
-  const deletePerson = (id) => {
-    if (window.confirm(`Do you really want to delete this person?`)) {
-      personService.unlink(id)
+  const deleteResource = (id) => {
+    if (window.confirm(`Do you really want to delete this resource?`)) {
+      resourceService.unlink(id)
         .then(() => {
-          const updatedPersons = persons.filter(p => p.id !== id);
-          setPersons(updatedPersons);
+          const updatedResources = resources.filter(p => p.id !== id);
+          setResources(updatedResources);
         })
         .catch(error => {
-          alert('Error deleting person');
+          alert('Error deleting resource');
           console.error('Error:', error);
         });
     }
   }
 
-  const filteredPersons = persons.filter(person =>
-    person.name.toLowerCase().includes(filter.toLowerCase())
+  const filteredResources = resources.filter(resource =>
+    resource.name.toLowerCase().includes(filter.toLowerCase())
   )
 
   return (
@@ -141,17 +141,17 @@ const App = () => {
 
       <h3>Add a new entry</h3>
 
-      <PersonForm
-        newName={newName}
-        newNumber={newNumber}
-        handleNameChange={handleNameChange}
-        handleNumberChange={handleNumberChange}
-        addPerson={addPerson}
+      <ResourceForm
+        newTitle={newTitle}
+        newDescription={newDescription}
+        handleResourceChange={handleResourceChange}
+        handleDescriptionChange={handleDescriptionChange}
+        addResource={addResource}
       />
 
       <h3>Numbers</h3>
 
-      <Persons persons={filteredPersons} deletePerson={deletePerson} />
+      <Resources resources={filteredResources} deleteResource={deleteResource} />
     </div>
   )
 }
