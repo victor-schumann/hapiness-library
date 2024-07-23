@@ -9,7 +9,7 @@ const Filter = ({ filter, handleFilterChange }) => {
   )
 }
 
-const ResourceForm = ({ newTitle, newDescription, handleResourceChange, handleDescriptionChange, addResource }) => {
+const ResourceForm = ({ newTitle, newDescription, newUrl, handleResourceChange, handleDescriptionChange, handleUrlChange, addResource }) => {
   return (
     <form onSubmit={addResource}>
       <div>
@@ -17,6 +17,9 @@ const ResourceForm = ({ newTitle, newDescription, handleResourceChange, handleDe
       </div>
       <div>
         description: <input value={newDescription} onChange={handleDescriptionChange} />
+      </div>
+      <div>
+        url: <input value={newUrl} onChange={handleUrlChange} />
       </div>
       <div>
         <button type="submit">add</button>
@@ -28,10 +31,15 @@ const ResourceForm = ({ newTitle, newDescription, handleResourceChange, handleDe
 const Resource = ({ resource, deleteResource }) => {
   return (
     <div>
-      <button onClick={() => deleteResource(resource.id)}>delete</button> {resource.name}: {resource.description}
+      <button onClick={() => deleteResource(resource.id)}>delete</button> 
+      <a href={resource.url} target="_blank" rel="noopener noreferrer">
+        {resource.name}
+      </a>
+      : {resource.description}
     </div>
   )
 }
+
 
 const Resources = ({ resources, deleteResource }) => {
   return (
@@ -48,6 +56,7 @@ const App = () => {
 
   const [newTitle, setNewTitle] = useState('')
   const [newDescription, setNewDescription] = useState('')
+  const [newUrl, setNewUrl] = useState('')
   const [filter, setFilter] = useState('')
 
   useEffect(() => {
@@ -67,6 +76,11 @@ const App = () => {
   const handleDescriptionChange = (event) => {
     setNewDescription(event.target.value)
   }
+
+    const handleUrlChange = (event) => {
+    setNewUrl(event.target.value)
+  }
+
   const handleFilterChange = (event) => {
     setFilter(event.target.value)
   }
@@ -76,13 +90,14 @@ const App = () => {
   
     const newResource = {
       name: newTitle,
-      description: newDescription
+      description: newDescription,
+      url: newUrl
     };
   
-    const existingResource = resources.find(resource => resource.name === newTitle);
+    const existingResource = resources.find(resource => resource.name === newTitle || resource.url == newUrl);
   
     if (existingResource) {
-      if (window.confirm(`${newTitle} is already added to the library. Replace the old data with the new data?`)) {
+      if (window.confirm(`${newTitle}'s URL or name is already added to the library. Replace the old data with the new data?`)) {
         resourceService.update(existingResource.id, newResource)
           .then(response => {
             const updatedResources = resources.map(resource =>
@@ -93,6 +108,7 @@ const App = () => {
             setResources(updatedResources);
             setNewTitle('');
             setNewDescription('');
+            setNewUrl('');
           })
           .catch(error => {
             alert('Error updating resource');
@@ -106,6 +122,7 @@ const App = () => {
         setResources(updatedResources);
         setNewTitle('');
         setNewDescription('');
+        setNewUrl('');
       })
       .catch(error => {
         alert('Error updating resource');
@@ -144,8 +161,10 @@ const App = () => {
       <ResourceForm
         newTitle={newTitle}
         newDescription={newDescription}
+        newUrl={newUrl}
         handleResourceChange={handleResourceChange}
         handleDescriptionChange={handleDescriptionChange}
+        handleUrlChange={handleUrlChange}
         addResource={addResource}
       />
 

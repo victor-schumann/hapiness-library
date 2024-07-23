@@ -1,9 +1,16 @@
 {
   "resources": [
     {
-      "name": "Test",
-      "description": "Hey, listen!",
+      "name": "github",
+      "description": "hey, listen!",
+      "url": "https://github.com/victor-schumann",
       "id": "1"
+    },
+    {
+      "id": "38d1",
+      "name": "paper",
+      "description": "sci hub!",
+      "url": "https://sci-hub.ru/"
     }
   ]
 }
